@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill Expense Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --ink:#182322; --muted:#6e7b78; --line:#dfe7e2; --paper:#f5f8f4; --white:#fff; --mint:#b9efcf; --green:#2f805c; --coral:#ff816f; --yellow:#ffd978; --navy:#243b45; }
+        * { box-sizing:border-box; }
+        body { margin:0; min-height:100vh; color:var(--ink); background:var(--paper); font-family:Arial,sans-serif; overflow-y:auto; }
+        button,input,select { font:inherit; }
+        button { cursor:pointer; border:0; }
+        .shell { max-width:1200px; margin:auto; padding:28px 24px 60px; }
+        header { display:flex; justify-content:space-between; align-items:center; margin-bottom:45px; }
+        .brand { display:flex; align-items:center; gap:10px; font-size:21px; font-weight:bold; }
+        .mark { width:30px; height:30px; border-radius:9px 9px 9px 2px; background:var(--coral); display:grid; place-items:center; }
+        .mark:after { content:''; width:11px; height:11px; border:3px solid var(--ink); border-radius:50%; }
+        .room { display:flex; align-items:center; gap:10px; padding:7px 12px 7px 7px; border:1px solid var(--line); border-radius:25px; background:white; color:var(--muted); font-size:13px; }
+        .room span { display:grid; place-items:center; width:28px; height:28px; border-radius:50%; background:var(--mint); color:var(--green); font-weight:bold; }
+        .hero { display:flex; align-items:end; justify-content:space-between; gap:25px; margin-bottom:38px; }
+        .eyebrow { color:var(--green); font-size:12px; font-weight:bold; letter-spacing:1.4px; text-transform:uppercase; }
+        h1 { max-width:700px; margin:13px 0; font-size:clamp(42px,7vw,76px); line-height:.98; letter-spacing:-3px; }
+        .intro { max-width:550px; color:var(--muted); font-size:17px; line-height:1.5; }
+        .primary { background:var(--ink); color:white; padding:15px 20px; border-radius:10px; font-weight:bold; }
+        .grid { display:grid; grid-template-columns:minmax(320px,620px); gap:20px; justify-content:center; }
+        .panel { padding:23px; background:var(--white); border:1px solid var(--line); border-radius:16px; }
+        .dark { background:var(--navy); color:white; border:0; }
+        .panel-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+        h2 { margin:0; font-size:20px; }
+        .tiny { color:var(--muted); font-size:11px; font-weight:bold; letter-spacing:1px; }
+        .dark .tiny { color:#abc0bf; }
+        .total { margin:10px 0 24px; font-size:42px; font-weight:bold; }
+        .total small { display:block; color:#abc0bf; font-size:11px; font-weight:normal; letter-spacing:1px; }
+        .member { display:flex; align-items:center; gap:10px; padding:13px 0; border-top:1px solid rgba(255,255,255,.14); }
+        .avatar { display:grid; place-items:center; width:32px; height:32px; border-radius:50%; color:var(--ink); font-size:11px; font-weight:bold; }
+        .member-name { flex:1; font-size:14px; }
+        .positive,.negative { font-size:13px; font-weight:bold; }
+        .positive { color:var(--mint); } .negative { color:#ffad9e; }
+        .expense { display:grid; grid-template-columns:40px 1fr auto; align-items:center; gap:13px; padding:14px 0; border-top:1px solid var(--line); }
+        .icon { display:grid; place-items:center; width:40px; height:40px; border-radius:10px; background:#edf5ef; font-size:19px; }
+        .expense-title { font-size:14px; font-weight:bold; }
+        .expense-meta { margin-top:4px; color:var(--muted); font-size:12px; }
+        .amount { font-size:14px; font-weight:bold; }
+        .settle { margin-top:20px; }
+        .notice { margin-bottom:14px; padding:13px 15px; border-radius:9px; background:#fff5dd; color:#735c21; font-size:13px; }
+        .transfer { display:flex; align-items:center; gap:12px; padding:14px 0; border-top:1px solid var(--line); font-size:14px; }
+        .transfer strong { font-size:14px; } .arrow { color:var(--coral); font-size:20px; }
+        .paid { margin-left:10px; padding:8px; border-radius:7px; background:var(--mint); color:var(--green); font-size:10px; font-weight:bold; }
+        .empty { padding:12px 0 2px; color:var(--muted); font-size:14px; }
+        .backdrop { display:none; position:fixed; inset:0; place-items:center; padding:20px; overflow-y:auto; background:#182322aa; }
+        .backdrop.open { display:grid; }
+        .modal { width:min(470px,100%); padding:26px; border-radius:16px; background:white; }
+        .modal-head { display:flex; justify-content:space-between; margin-bottom:18px; }
+        .close { background:transparent; color:var(--muted); font-size:25px; }
+        label { display:block; margin:14px 0 7px; color:var(--muted); font-size:11px; font-weight:bold; letter-spacing:1px; }
+        input,select { width:100%; padding:12px; border:1px solid var(--line); border-radius:8px; background:#fbfdfb; color:var(--ink); }
+        .payer-options { display:flex; flex-wrap:wrap; gap:8px; }
+        .payer-option { display:flex; align-items:center; gap:7px; margin:0; padding:9px 11px; border:1px solid var(--line); border-radius:8px; background:#fbfdfb; color:var(--ink); font-size:13px; font-weight:normal; letter-spacing:0; cursor:pointer; text-transform:none; }
+        .payer-option:has(input:checked) { border-color:var(--green); background:var(--mint); color:var(--green); }
+        .payer-option input { width:auto; padding:0; accent-color:var(--green); }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .modal .primary { width:100%; margin-top:19px; }
+        .page-actions { display:flex; justify-content:flex-end; margin-top:20px; }
+        .next-page { background:var(--mint); color:var(--green); padding:12px 16px; border-radius:9px; font-weight:bold; }
+        .back-link { border:1px solid var(--line); background:white; color:var(--muted); padding:11px 15px; border-radius:9px; font-size:12px; font-weight:bold; }
+        .details-page { display:none; }
+        .details-page.active { display:block; }
+        .recent-page { display:none; }
+        .recent-page.active { display:block; }
+        .summary-page { display:none; }
+        .summary-page.active { display:block; }
+        .summary-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+        .summary-card { padding:20px; border:1px solid var(--line); border-radius:12px; background:var(--paper); }
+        .summary-card .summary-value { margin-top:10px; font-size:28px; font-weight:bold; letter-spacing:-1px; }
+        .summary-card .summary-label { color:var(--muted); font:11px 'DM Mono',monospace; letter-spacing:1px; text-transform:uppercase; }
+        .insight-section { margin-top:24px; padding-top:22px; border-top:1px solid var(--line); }
+        .category-row { display:grid; grid-template-columns:120px 1fr 90px; align-items:center; gap:12px; margin-top:14px; font-size:13px; }
+        .category-track { height:8px; overflow:hidden; border-radius:8px; background:var(--line); }
+        .category-fill { height:100%; border-radius:inherit; background:var(--green); }
+        .category-amount { text-align:right; font-weight:bold; }
+        .insight-list { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+        .insight-box { padding:16px; border-radius:10px; background:#eef8f1; }
+        .insight-box strong { display:block; margin-top:7px; font-size:16px; }
+        @media (max-width:760px) { .summary-grid { grid-template-columns:1fr; } }
+        @media (max-width:760px) { .category-row { grid-template-columns:90px 1fr 75px; } .insight-list { grid-template-columns:1fr; } }
+        .dashboard-page.hidden-page { display:none; }
+        .item-row { display:grid; grid-template-columns:42px 1fr 150px 110px; align-items:center; gap:14px; padding:15px 0; border-top:1px solid var(--line); }
+        .item-row:first-child { border-top:0; }
+        .item-info strong { display:block; font-size:14px; }
+        .item-info small { display:block; margin-top:5px; color:var(--muted); font-size:12px; }
+        .item-payer { color:var(--muted); font-size:13px; }
+        .item-price { text-align:right; font-weight:bold; }
+        .detail-total { display:flex; justify-content:space-between; margin-top:20px; padding-top:18px; border-top:2px solid var(--ink); font-size:18px; font-weight:bold; }
+        .items-heading { display:flex; justify-content:space-between; align-items:center; margin-top:14px; }
+        .item-input-row { display:grid; grid-template-columns:1fr 130px 34px; gap:8px; margin-top:8px; }
+        .add-item { margin-top:10px; padding:8px 11px; border:1px dashed var(--green); border-radius:8px; background:white; color:var(--green); font-size:12px; font-weight:bold; }
+        .remove-item { background:#fff0ed; color:#c85b4d; border-radius:8px; font-weight:bold; }
+        .bill-total { margin-top:13px; text-align:right; color:var(--green); font-size:14px; font-weight:bold; }
+        .setup-screen { position:fixed; inset:0; z-index:10; display:grid; place-items:center; padding:20px; overflow-y:auto; background:var(--paper); }
+        .setup-card { width:min(560px,100%); padding:30px; border:1px solid var(--line); border-radius:16px; background:white; box-shadow:0 20px 50px #243b4514; }
+        .setup-card h1 { margin:12px 0; font-size:42px; letter-spacing:-2px; }
+        .setup-card p { color:var(--muted); line-height:1.5; }
+        .name-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .budget-line { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .hidden { display:none; }
+        .access-tabs { display:flex; gap:8px; margin:20px 0; }
+        .access-tab { flex:1; padding:11px; border-radius:8px; background:var(--paper); color:var(--muted); font-weight:bold; }
+        .access-tab.active { background:var(--mint); color:var(--green); }
+        .access-form { display:none; }
+        .access-form.active { display:block; }
+        .code-box { margin-top:14px; padding:14px; border-radius:9px; background:#eef8f1; color:var(--green); text-align:center; font-size:24px; font-weight:bold; letter-spacing:4px; }
+        .group-code { padding:8px 10px; border-radius:8px; background:var(--mint); color:var(--green); font-size:11px; font-weight:bold; letter-spacing:1px; }
+        .room .group-code { display:inline-block; width:auto; height:auto; border-radius:8px; }
+        .manage { background:transparent; color:var(--green); font-size:12px; font-weight:bold; }
+        .manage-list { margin:16px 0; }
+        .manage-member { display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid var(--line); }
+        .manage-member span { flex:1; }
+        .remove-member { padding:7px 9px; border-radius:7px; background:#fff0ed; color:#c85b4d; font-size:11px; font-weight:bold; }
+        .danger { width:100%; margin-top:12px; padding:12px; border-radius:8px; background:#fff0ed; color:#c85b4d; font-weight:bold; }
+        .welcome-screen { position:fixed; inset:0; z-index:20; display:grid; place-items:center; padding:24px; overflow-y:auto; background:#182322; }
+        .welcome-screen.hidden { display:none; }
+        .welcome-frame { position:relative; display:grid; grid-template-columns:1fr 1fr; width:min(1080px,100%); min-height:min(650px,calc(100vh - 48px)); overflow:hidden; border:1px solid #ffffff40; border-radius:24px; background:var(--paper); box-shadow:0 28px 80px #00000055; }
+        .welcome-copy { display:flex; flex-direction:column; justify-content:space-between; padding:clamp(28px,6vw,76px); }
+        .welcome-copy h1 { max-width:480px; margin:70px 0 20px; font-size:clamp(42px,5.5vw,72px); line-height:.96; letter-spacing:-4px; }
+        .welcome-copy p { max-width:410px; color:var(--muted); font-size:17px; line-height:1.55; }
+        .welcome-copy .primary { align-self:flex-start; margin-top:22px; }
+        .welcome-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:22px; }
+        .welcome-actions .primary { margin-top:0; }
+        .welcome-actions .secondary { padding:15px 20px; border:1px solid var(--line); border-radius:10px; background:transparent; color:var(--ink); font-weight:bold; }
+        .welcome-foot { color:var(--muted); font:11px 'DM Mono',monospace; letter-spacing:1px; text-transform:uppercase; }
+        .welcome-image { position:relative; min-height:440px; background:url('https://www.lpu.in/lpu-assets/images/student-services/standard-2.webp') center/cover; }
+        .welcome-image:after { content:'SHARED SPACE / SHARED COSTS'; position:absolute; right:24px; bottom:24px; padding:10px 12px; border:1px solid #ffffff99; border-radius:6px; background:#182322b8; color:white; font:11px 'DM Mono',monospace; letter-spacing:1px; }
+        @media (max-width:760px) { .welcome-screen { padding:12px; } .welcome-frame { grid-template-columns:1fr; min-height:calc(100vh - 24px); border-radius:18px; } .welcome-image { min-height:230px; grid-row:1; } .welcome-copy { padding:25px; } .welcome-copy h1 { margin:38px 0 14px; letter-spacing:-2.5px; } .welcome-copy p { font-size:15px; } .welcome-actions { display:grid; } .welcome-actions button { width:100%; } }
+        @media (max-width:760px) { .shell { padding:20px 16px 45px; } header { margin-bottom:35px; } .hero { display:block; } h1 { letter-spacing:-2px; } .hero .primary { width:100%; margin-top:20px; } .grid { grid-template-columns:1fr; } }
+        body { font-family:'Space Grotesk',sans-serif; background:radial-gradient(circle at 85% 0%,#e3f4e8 0,transparent 28%),var(--paper); }
+        .shell { max-width:1120px; padding-top:24px; }
+        header { min-height:52px; margin-bottom:54px; padding-bottom:17px; border-bottom:1px solid var(--line); }
+        .brand { letter-spacing:-.6px; }
+        .room { box-shadow:0 5px 18px #243b4509; }
+        .hero { align-items:flex-end; margin-bottom:34px; }
+        .eyebrow,.tiny,label { font-family:'DM Mono',monospace; }
+        h1 { max-width:650px; font-weight:600; letter-spacing:-4px; }
+        .intro { font-size:16px; }
+        .primary { box-shadow:0 4px 0 #b5c8bc; transition:transform .15s,box-shadow .15s; }
+        .primary:hover { transform:translateY(-2px); box-shadow:0 6px 0 #b5c8bc; }
+        .panel { box-shadow:0 10px 30px #243b4508; }
+        .dark { background:linear-gradient(145deg,#243b45,#1c3039); box-shadow:0 15px 30px #243b4520; }
+        .total { font-size:46px; letter-spacing:-2px; }
+        .progress-track { height:7px; margin:12px 0 20px; overflow:hidden; border-radius:8px; background:#ffffff26; }
+        .progress-fill { height:100%; width:0; border-radius:inherit; background:var(--mint); transition:width .2s; }
+        .settle { box-shadow:0 10px 30px #243b4508; }
+        .notice { border-left:3px solid var(--yellow); }
+        .transfer { min-height:58px; }
+        .paid { transition:background .15s,transform .15s; }
+        .paid:hover { transform:translateY(-1px); background:#d4f8e1; }
+        .next-page { box-shadow:0 3px 0 #93c8aa; }
+        .modal,.setup-card { box-shadow:0 25px 70px #1823222b; }
+        .setup-screen { background:radial-gradient(circle at 20% 10%,#e3f4e8 0,transparent 30%),var(--paper); }
+        .setup-card { border-color:#d4e4da; }
+        @media (max-width:760px) { header { align-items:flex-start; gap:18px; flex-direction:column; margin-bottom:38px; } .room { width:100%; justify-content:space-between; } h1 { letter-spacing:-2.5px; } .hero { margin-bottom:28px; } .item-row { grid-template-columns:38px 1fr auto; } .item-payer { grid-column:2; } .item-price { grid-column:3; grid-row:1 / span 2; } }
+    </style>
+    </head>
+    <body>
+    <div class="welcome-screen" id="welcomeScreen"><div class="welcome-frame"><div class="welcome-copy"><div class="brand"><span class="mark"></span>Bill Expense Tracker for roommates</div><div><div class="eyebrow">A calmer way to share a room</div><h1>Every bill. One clear picture.</h1><p>Track shared spending, see exactly who owes whom, and settle up with fewer payments.</p><div class="welcome-actions"><button class="primary" id="createApp">Create a group</button><button class="secondary" id="joinApp">Join a group</button></div></div><div class="welcome-foot">Private by design · Built for shared homes</div></div><div class="welcome-image" role="img" aria-label="People working together in a shared workspace"></div></div></div>
+    <div class="setup-screen" id="setupScreen"><div class="setup-card"><button type="button" class="back-link" id="backWelcome">&lt;- Back</button><div class="eyebrow">Bill Expense Tracker</div><h1>Share bills without the awkward math.</h1><p>Create a group and invite people with a unique code, or join an existing group.</p><div class="access-tabs"><button type="button" class="access-tab active" data-tab="create">Create group</button><button type="button" class="access-tab" data-tab="join">Join group</button></div><form id="setupForm" class="access-form active"><label for="groupName">GROUP NAME</label><input id="groupName" required placeholder="e.g. Maple House"><div class="budget-line"><div><label for="budgetInput">MONTHLY BUDGET (INR)</label><input id="budgetInput" type="number" min="1" required value="50000"></div><div><label for="yourName">YOUR NAME</label><input id="yourName" required placeholder="Your name"></div></div><label>GROUP PEOPLE</label><div class="name-grid"><input class="member-input" required placeholder="Roommate 1"><input class="member-input" required placeholder="Roommate 2"><input class="member-input" required placeholder="Roommate 3"><input class="member-input" placeholder="Roommate 4 (optional)"></div><button class="primary" type="submit">Register my group</button><div id="createdCode" class="code-box hidden"></div></form><form id="joinForm" class="access-form"><label for="joinCode">GROUP CODE</label><input id="joinCode" required maxlength="8" placeholder="e.g. A7K9P2"><label for="joinName">YOUR NAME</label><input id="joinName" required placeholder="Your name"><button class="primary" type="submit">Join group</button><p class="tiny">Ask the group owner for their unique code.</p></form></div></div>
+    <main class="shell">
+        <header><div class="brand"><span class="mark"></span>Bill Expense Tracker for roommates</div><div class="room"><span id="memberCount">4</span> <b id="groupTitle">Maple House</b> <span class="group-code" id="groupCode">CODE</span><button class="manage" id="manageGroup">Manage group</button></div></header>
+        <div class="dashboard-page" id="dashboardPage">
+        <section class="hero"><div><div class="eyebrow">Shared home expense tracker</div><h1>Stop keeping score in your head.</h1><p class="intro">Log groceries, bills, and little household costs once. TabTogether calculates who owes whom and the fewest payments needed to settle up.</p></div><button class="primary" id="openModal">+ Add expense</button></section>
+        <section class="grid">
+            <aside class="panel dark"><div class="panel-head"><h2>Group balance</h2><span class="tiny">LIVE</span></div><div class="total" id="netBalance">₹0.00<small>your net position</small></div><div class="tiny" id="budgetStatus"></div><div class="progress-track"><div class="progress-fill" id="budgetProgress"></div></div><div id="memberList"></div></aside>
+        </section>
+        <section class="panel settle"><div class="panel-head"><h2>Settle up</h2><span class="tiny" id="transferCount"></span></div><div class="notice">These payments settle the group using the minimum number of transactions.</div><div id="settlementList"></div></section>
+        <div class="page-actions"><button class="next-page" id="nextPage">Next page: purchase details -&gt;</button></div>
+        <div class="page-actions"><button class="back-link" id="backToSetup">&lt;- Back to group access</button></div>
+        </div>
+        <section class="details-page" id="detailsPage"><div class="panel-head"><button class="next-page" id="backPage">&lt;- Back to balance</button><span class="tiny">ITEMIZED PURCHASES</span></div><div class="panel"><div class="panel-head"><h2>What was bought?</h2><span class="tiny" id="detailsCount">0 ITEMS</span></div><div id="itemList"></div><div class="detail-total"><span>Total shared spending</span><span id="detailTotal">₹0.00</span></div></div><div class="page-actions"><button class="next-page" id="recentPage">Next page: recent activity -&gt;</button></div></section>
+        <section class="recent-page" id="recentPageView"><div class="panel-head"><button class="next-page" id="backDetails">&lt;- Back to purchases</button><span class="tiny">RECENT ACTIVITY</span></div><div class="panel"><div class="panel-head"><h2>Recent bills</h2><span class="tiny" id="recentCount">0 BILLS</span></div><div id="recentList"></div></div><div class="page-actions"><button class="next-page" id="summaryPage">Next page: monthly summary -&gt;</button></div></section>
+        <section class="summary-page" id="summaryPageView"><div class="panel-head"><button class="next-page" id="backRecent">&lt;- Back to activity</button><span class="tiny">GROUP INSIGHTS</span></div><div class="panel"><div class="panel-head"><h2>Monthly overview</h2><span class="tiny">LIVE TOTALS</span></div><div class="summary-grid"><div class="summary-card"><div class="summary-label">Total spent</div><div class="summary-value" id="summarySpent">₹0.00</div></div><div class="summary-card"><div class="summary-label">Budget remaining</div><div class="summary-value" id="summaryRemaining">₹0.00</div></div><div class="summary-card"><div class="summary-label">People sharing</div><div class="summary-value" id="summaryPeople">0</div></div><div class="summary-card"><div class="summary-label">Open transfers</div><div class="summary-value" id="summaryTransfers">0</div></div></div><div class="insight-section"><div class="panel-head"><h2>Spending by category</h2><span class="tiny">WHERE IT GOES</span></div><div id="categoryChart"></div></div><div class="insight-section"><div class="insight-list"><div class="insight-box"><div class="summary-label">Highest payer</div><strong id="highestPayer">No payments yet</strong></div><div class="insight-box"><div class="summary-label">Settlement status</div><strong id="settlementStatus">Everyone is settled</strong></div></div></div></div></section>
+    </main>
+    <div class="backdrop" id="backdrop"><form class="modal" id="expenseForm"><div class="modal-head"><h2>Add a bill</h2><button type="button" class="close" id="closeModal">x</button></div><label for="description">BILL NAME</label><input id="description" required placeholder="e.g. Weekly groceries"><div class="form-row"><div><label for="category">CATEGORY</label><select id="category"><option value="cart">Groceries</option><option value="house">Rent and bills</option><option value="clean">Home supplies</option><option value="pizza">Takeout</option><option value="other">Other</option></select></div><div><label>PAID BY (SELECT ONE OR MORE)</label><div class="payer-options" id="payerOptions"></div></div></div><div class="items-heading"><label style="margin:14px 0 0">ITEMS IN THIS BILL</label><span class="tiny">NAME + PRICE</span></div><div id="billItems"></div><button type="button" class="add-item" id="addItem">+ Add another item</button><div class="bill-total">Bill total: <span id="billTotal">₹0.00</span></div><button class="primary" type="submit">Add bill to the tab</button></form></div>
+    <div class="backdrop" id="manageBackdrop"><form class="modal" id="manageForm"><div class="modal-head"><h2>Manage group</h2><button type="button" class="close" id="closeManage">x</button></div><div class="code-box" id="manageCode"></div><label for="newMember">ADD A MEMBER</label><div class="form-row"><input id="newMember" placeholder="Member name"><button class="primary" type="button" id="addMember">Add member</button></div><div class="manage-list" id="manageList"></div><button class="danger" type="button" id="exitGroup">Exit this group</button></form></div>
+    <script>
+        let members = [{name:'You',color:'#b9efcf'},{name:'Maya',color:'#ffd978'},{name:'Noah',color:'#ffad9e'},{name:'Priya',color:'#c5b9f4'}];
+        let groupName = 'Maple House'; let budget = 50000;
+        let groupCode = '';
+        const icons = {cart:'🛒',house:'🏠',clean:'🧻',pizza:'🍕',other:'✨'};
+        let expenses = [];
+        let settlements = [];
+        const get = id => document.getElementById(id); const money = n => new Intl.NumberFormat('en-IN', {style:'currency', currency:'INR', maximumFractionDigits:2}).format(n);
+        const initials = name => name === 'You' ? 'YO' : name.slice(0,2).toUpperCase(); const payerNames = bill => (bill.payers || [bill.payer]).filter(Boolean).join(' and ');
+        function render() {
+            const paid = Object.fromEntries(members.map(member => [member.name,0])); expenses.forEach(item => { const payers = item.payers || [item.payer]; payers.forEach(payer => paid[payer] += item.amount / payers.length); });
+            const total = expenses.reduce((sum,item) => sum + item.amount,0); const share = total / members.length;
+            const balances = members.map(member => ({name:member.name,value:paid[member.name] - share}));
+            settlements.forEach(payment => { const from = balances.find(item => item.name === payment.from); const to = balances.find(item => item.name === payment.to); if(from) from.value += payment.amount; if(to) to.value -= payment.amount; });
+            const yours = balances[0].value;
+            get('netBalance').innerHTML = (yours >= 0 ? '+' : '-') + money(Math.abs(yours)) + '<small>your net position</small>';
+            get('budgetStatus').textContent = money(total) + ' of ' + money(budget) + ' MONTHLY BUDGET USED';
+            get('budgetProgress').style.width = Math.min((total / budget) * 100, 100) + '%';
+            get('memberList').innerHTML = balances.map(item => `<div class="member"><span class="avatar" style="background:${members.find(m => m.name === item.name).color}">${initials(item.name)}</span><span class="member-name">${item.name}${item.name === 'You' ? ' (you)' : ''}</span><span class="${item.value >= 0 ? 'positive' : 'negative'}">${item.value >= 0 ? '+' : '-'}${money(Math.abs(item.value))}</span></div>`).join('');
+            const creditors = balances.filter(item => item.value > .005).map(item => ({...item})).sort((a,b) => b.value-a.value); const debtors = balances.filter(item => item.value < -.005).map(item => ({name:item.name,value:-item.value})).sort((a,b) => b.value-a.value); const transfers=[]; let d=0,c=0;
+            while(d < debtors.length && c < creditors.length) { const amount=Math.min(debtors[d].value,creditors[c].value); transfers.push({from:debtors[d].name,to:creditors[c].name,amount}); debtors[d].value-=amount; creditors[c].value-=amount; if(debtors[d].value<.01)d++; if(creditors[c].value<.01)c++; }
+            get('transferCount').textContent = transfers.length + ' MINIMUM TRANSFER' + (transfers.length === 1 ? '' : 'S'); get('settlementList').innerHTML = transfers.length ? transfers.map(item => `<div class="transfer"><strong>${item.from}</strong><span class="arrow">-></span><strong>${item.to}</strong><span style="margin-left:auto;font-weight:bold">${money(item.amount)}</span><button class="paid" onclick="settleTransfer('${item.from}', '${item.to}', ${item.amount})">MARK PAID</button></div>`).join('') : '<div class="empty">Everyone is settled up.</div>';
+            const lineItems = expenses.flatMap(bill => (bill.items || [{name:bill.title,price:bill.amount}]).map(item => ({...item, icon:bill.icon, payer:payerNames(bill), date:bill.date}))); get('detailsCount').textContent = lineItems.length + ' ITEM' + (lineItems.length === 1 ? '' : 'S'); get('detailTotal').textContent = money(total); get('itemList').innerHTML = lineItems.length ? lineItems.map(item => `<div class="item-row"><div class="icon">${item.icon}</div><div class="item-info"><strong>${item.name}</strong><small>${item.date}</small></div><div class="item-payer">Paid by ${item.payer}</div><div class="item-price">${money(item.price)}</div></div>`).join('') : '<div class="empty">No purchases added yet.</div>';
+            get('recentCount').textContent = expenses.length + ' BILL' + (expenses.length === 1 ? '' : 'S'); get('recentList').innerHTML = expenses.length ? expenses.map(bill => `<div class="item-row"><div class="icon">${bill.icon}</div><div class="item-info"><strong>${bill.title}</strong><small>${bill.date} · ${(bill.items || []).length || 1} item${(bill.items || []).length === 1 ? '' : 's'}</small></div><div class="item-payer">Paid by ${payerNames(bill)}</div><div class="item-price">${money(bill.amount)}</div></div>`).join('') : '<div class="empty">No recent bills yet.</div>';
+            get('summarySpent').textContent = money(total); get('summaryRemaining').textContent = money(Math.max(budget - total, 0)); get('summaryPeople').textContent = members.length; get('summaryTransfers').textContent = transfers.length;
+            const categoryNames = {cart:'Groceries',house:'Rent and bills',clean:'Home supplies',pizza:'Takeout',other:'Other'}; const categoryTotals = {}; expenses.forEach(bill => { const key=bill.category || 'other'; categoryTotals[key]=(categoryTotals[key] || 0) + bill.amount; }); const categoryRows = Object.entries(categoryTotals).sort((a,b) => b[1]-a[1]); const maxCategory = categoryRows[0] ? categoryRows[0][1] : 1; get('categoryChart').innerHTML = categoryRows.length ? categoryRows.map(([key,value]) => `<div class="category-row"><span>${categoryNames[key]}</span><div class="category-track"><div class="category-fill" style="width:${(value / maxCategory) * 100}%"></div></div><span class="category-amount">${money(value)}</span></div>`).join('') : '<div class="empty">Add bills to see your spending pattern.</div>'; const payerTotals = Object.fromEntries(members.map(member => [member.name,0])); expenses.forEach(bill => payerTotals[bill.payer] += bill.amount); const topPayer = Object.entries(payerTotals).sort((a,b) => b[1]-a[1])[0]; get('highestPayer').textContent = topPayer && topPayer[1] ? topPayer[0] + ' · ' + money(topPayer[1]) : 'No payments yet'; get('settlementStatus').textContent = transfers.length ? transfers.length + ' payment' + (transfers.length === 1 ? '' : 's') + ' pending' : 'Everyone is settled';
+        }
+        function settleTransfer(from, to, amount) { settlements.push({from, to, amount}); render(); }
+        function loadPayers() { get('payerOptions').innerHTML = members.map(member => `<label class="payer-option"><input type="checkbox" name="payer" value="${member.name}"><span>${member.name}</span></label>`).join(''); }
+        function makeCode() { return Math.random().toString(36).slice(2,8).toUpperCase(); }
+        function renderMembers() { get('manageCode').textContent = 'GROUP CODE: ' + groupCode; get('manageList').innerHTML = members.map((member,index) => `<div class="manage-member"><span>${member.name}${index === 0 ? ' (you)' : ''}</span>${index ? `<button type="button" class="remove-member" onclick="removeMember(${index})">REMOVE</button>` : ''}</div>`).join(''); }
+        function removeMember(index) { members.splice(index,1); expenses = expenses.filter(item => members.some(member => member.name === item.payer)); settlements = []; loadPayers(); renderMembers(); render(); }
+        function addItemRow(name = '', price = '') { const row = document.createElement('div'); row.className = 'item-input-row'; row.innerHTML = `<input class="bill-item-name" required placeholder="Item name" value="${name}"><input class="bill-item-price" required type="number" min="0.01" step="0.01" placeholder="Price (₹)" value="${price}"><button type="button" class="remove-item">x</button>`; row.querySelector('.remove-item').onclick = () => { if(document.querySelectorAll('.item-input-row').length > 1) { row.remove(); updateBillTotal(); } }; row.querySelector('.bill-item-price').oninput = updateBillTotal; get('billItems').appendChild(row); }
+        function updateBillTotal() { const total = [...document.querySelectorAll('.bill-item-price')].reduce((sum, input) => sum + (parseFloat(input.value) || 0), 0); get('billTotal').textContent = money(total); }
+        get('openModal').onclick = () => get('backdrop').classList.add('open'); get('closeModal').onclick = () => get('backdrop').classList.remove('open'); get('backdrop').onclick = event => { if(event.target === get('backdrop')) get('backdrop').classList.remove('open'); };
+        get('addItem').onclick = () => addItemRow();
+        get('expenseForm').onsubmit = event => { event.preventDefault(); const category=get('category').value; const payers=[...document.querySelectorAll('input[name="payer"]:checked')].map(input => input.value); if(!payers.length) { alert('Select at least one person who paid this bill.'); return; } const items=[...document.querySelectorAll('.item-input-row')].map(row => ({name:row.querySelector('.bill-item-name').value.trim(),price:parseFloat(row.querySelector('.bill-item-price').value)})); const amount=items.reduce((sum,item) => sum + item.price,0); expenses.unshift({title:get('description').value,amount,payers,payer:payers[0],icon:icons[category],category,date:'Just now',items}); event.target.reset(); get('billItems').innerHTML=''; addItemRow(); updateBillTotal(); get('backdrop').classList.remove('open'); render(); }; render();
+        get('nextPage').onclick = () => { get('dashboardPage').classList.add('hidden-page'); get('detailsPage').classList.add('active'); };
+        get('backPage').onclick = () => { get('detailsPage').classList.remove('active'); get('dashboardPage').classList.remove('hidden-page'); };
+        get('recentPage').onclick = () => { get('detailsPage').classList.remove('active'); get('recentPageView').classList.add('active'); };
+        get('backDetails').onclick = () => { get('recentPageView').classList.remove('active'); get('detailsPage').classList.add('active'); };
+        get('summaryPage').onclick = () => { get('recentPageView').classList.remove('active'); get('summaryPageView').classList.add('active'); };
+        get('backRecent').onclick = () => { get('summaryPageView').classList.remove('active'); get('recentPageView').classList.add('active'); };
+        document.querySelectorAll('.access-tab').forEach(tab => tab.onclick = () => { document.querySelectorAll('.access-tab').forEach(item => item.classList.remove('active')); document.querySelectorAll('.access-form').forEach(form => form.classList.remove('active')); tab.classList.add('active'); get(tab.dataset.tab === 'create' ? 'setupForm' : 'joinForm').classList.add('active'); });
+        get('setupForm').onsubmit = event => { event.preventDefault(); const inputs = [...document.querySelectorAll('.member-input')].map(input => input.value.trim()).filter(Boolean); const yourName = get('yourName').value.trim(); members = [{name:yourName,color:'#b9efcf'}, ...inputs.map((name,index) => ({name,color:['#ffd978','#ffad9e','#c5b9f4','#9ed9ed'][index % 4]}))]; groupName = get('groupName').value.trim(); budget = parseFloat(get('budgetInput').value); groupCode = makeCode(); get('groupTitle').textContent = groupName; get('memberCount').textContent = members.length; get('groupCode').textContent = 'CODE: ' + groupCode; get('createdCode').textContent = 'Your invite code: ' + groupCode; get('createdCode').classList.remove('hidden'); loadPayers(); renderMembers(); get('setupScreen').classList.add('hidden'); render(); };
+        get('joinForm').onsubmit = event => { event.preventDefault(); const entered = get('joinCode').value.trim().toUpperCase(); if(!groupCode || entered !== groupCode) { alert('That group code is not valid in this browser. Create a group first or use the owner code.'); return; } const name = get('joinName').value.trim(); if(!members.some(member => member.name.toLowerCase() === name.toLowerCase())) members.push({name,color:'#9ed9ed'}); get('memberCount').textContent = members.length; get('groupCode').textContent = 'CODE: ' + groupCode; loadPayers(); renderMembers(); get('setupScreen').classList.add('hidden'); render(); };
+        get('manageGroup').onclick = () => { renderMembers(); get('manageBackdrop').classList.add('open'); }; get('closeManage').onclick = () => get('manageBackdrop').classList.remove('open'); get('manageBackdrop').onclick = event => { if(event.target === get('manageBackdrop')) get('manageBackdrop').classList.remove('open'); };
+        get('addMember').onclick = () => { const name = get('newMember').value.trim(); if(name && !members.some(member => member.name.toLowerCase() === name.toLowerCase())) { members.push({name,color:'#9ed9ed'}); get('newMember').value=''; get('memberCount').textContent=members.length; loadPayers(); renderMembers(); render(); } };
+        get('exitGroup').onclick = () => { get('manageBackdrop').classList.remove('open'); get('setupScreen').classList.remove('hidden'); expenses=[]; settlements=[]; groupCode=''; };
+        loadPayers();
+        function openAccessTab(tabName) { const tab = document.querySelector(`[data-tab="${tabName}"]`); tab.click(); get('welcomeScreen').classList.add('hidden'); }
+        get('createApp').onclick = () => openAccessTab('create');
+        get('joinApp').onclick = () => openAccessTab('join');
+        get('backWelcome').onclick = () => { get('setupScreen').classList.add('hidden'); get('welcomeScreen').classList.remove('hidden'); };
+        get('backToSetup').onclick = () => { get('dashboardPage').classList.add('hidden-page'); get('setupScreen').classList.remove('hidden'); get('welcomeScreen').classList.add('hidden'); };
+    </script>
+</body>
+</html>
